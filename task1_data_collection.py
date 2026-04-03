@@ -1,4 +1,5 @@
 
+
 import requests   # for making HTTP requests
 import json       # for saving data as JSON
 import time       # for sleep between category loops
@@ -9,21 +10,35 @@ BASE_URL = "https://hacker-news.firebaseio.com/v0"
 
 HEADERS = {"User-Agent": "TrendPulse/1.0"}
 
+# Number of top story IDs to pull from HackerNews
 TOP_N = 500
-
 MAX_PER_CATEGORY = 25
 
+# Category → keyword mapping (case-insensitive matching)
 CATEGORIES = {
     "technology":    ["AI", "software", "tech", "code", "computer",
-                      "data", "cloud", "API", "GPU", "LLM"],
+                      "data", "cloud", "API", "GPU", "LLM", "open source",
+                      "developer", "programming", "startup", "model",
+                      "robot", "chip", "hardware", "security", "hack",
+                      "python", "linux", "web", "app", "tool"],
     "worldnews":     ["war", "government", "country", "president",
-                      "election", "climate", "attack", "global"],
+                      "election", "climate", "attack", "global",
+                      "policy", "law", "court", "military", "china",
+                      "russia", "europe", "ukraine", "india", "iran",
+                      "sanctions", "nuclear", "treaty", "crisis"],
     "sports":        ["NFL", "NBA", "FIFA", "sport", "game", "team",
-                      "player", "league", "championship"],
+                      "player", "league", "championship", "tennis",
+                      "soccer", "football", "baseball", "olympic",
+                      "tournament", "match", "coach", "win", "loss"],
     "science":       ["research", "study", "space", "physics",
-                      "biology", "discovery", "NASA", "genome"],
+                      "biology", "discovery", "NASA", "genome",
+                      "climate", "ocean", "planet", "quantum",
+                      "medicine", "vaccine", "cancer", "brain",
+                      "evolution", "asteroid", "telescope", "gene"],
     "entertainment": ["movie", "film", "music", "Netflix", "game",
-                      "book", "show", "award", "streaming"],
+                      "book", "show", "award", "streaming", "spotify",
+                      "youtube", "disney", "apple tv", "hbo",
+                      "album", "concert", "actor", "director", "series"],
 }
 
 
@@ -40,6 +55,11 @@ def assign_category(title):
                 return category   # stop at the first match
     return None  # story doesn't fit any category
 
+
+# ─────────────────────────────────────────────
+# STEP 1: Fetch the top 500 story IDs
+# ─────────────────────────────────────────────
+
 def fetch_top_story_ids():
     """
     Calls the /topstories endpoint and returns the first TOP_N IDs.
@@ -54,6 +74,11 @@ def fetch_top_story_ids():
     except requests.RequestException as e:
         print(f"[ERROR] Could not fetch top story IDs: {e}")
         return []
+
+
+# ─────────────────────────────────────────────
+# STEP 2: Fetch details for a single story ID
+# ─────────────────────────────────────────────
 
 def fetch_story(story_id):
     """
@@ -70,7 +95,10 @@ def fetch_story(story_id):
         print(f"[WARNING] Failed to fetch story {story_id}: {e}")
         return None
 
-#  Extract the 7 required fields
+
+# ─────────────────────────────────────────────
+# STEP 3: Extract the 7 required fields
+# ─────────────────────────────────────────────
 
 def extract_fields(story, category):
     """
@@ -88,7 +116,9 @@ def extract_fields(story, category):
     }
 
 
-# MAIN function 
+# ─────────────────────────────────────────────
+# MAIN PIPELINE
+# ─────────────────────────────────────────────
 
 def main():
     # -- Get the top story IDs first --
@@ -134,10 +164,9 @@ def main():
 
         print(f"  → Collected {category_counts[category]} stories")
 
-        # Wait 2 seconds between each category loop (as required)
         time.sleep(2)
 
-    os.makedirs("data", exist_ok=True)   # create data/ folder if needed
+    os.makedirs("data", exist_ok=True)   
 
     today_str = datetime.now().strftime("%Y%m%d")
     output_path = f"data/trends_{today_str}.json"
@@ -145,10 +174,10 @@ def main():
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(collected, f, indent=2, ensure_ascii=False)
 
-    # -- Final summary --
+    
     print(f"\nCollected {len(collected)} stories. Saved to {output_path}")
 
 
-# Run the script
+
 if __name__ == "__main__":
     main()
