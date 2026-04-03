@@ -1,11 +1,3 @@
-"""
-TrendPulse - Task 1: Fetch Data from API
-File: task1_data_collection.py
-
-This script fetches trending stories from the HackerNews public API,
-categorises them by keywords in their titles, and saves the results
-to a JSON file inside the data/ folder.
-"""
 
 import requests   # for making HTTP requests
 import json       # for saving data as JSON
@@ -13,24 +5,14 @@ import time       # for sleep between category loops
 import os         # for creating the data/ folder
 from datetime import datetime  # for the collected_at timestamp
 
-
-# ─────────────────────────────────────────────
-# CONFIGURATION
-# ─────────────────────────────────────────────
-
-# Base URL for HackerNews Firebase API
 BASE_URL = "https://hacker-news.firebaseio.com/v0"
 
-# Headers to identify our app (good practice)
 HEADERS = {"User-Agent": "TrendPulse/1.0"}
 
-# Number of top story IDs to pull from HackerNews
 TOP_N = 500
 
-# Maximum stories we want to collect per category
 MAX_PER_CATEGORY = 25
 
-# Category → keyword mapping (case-insensitive matching)
 CATEGORIES = {
     "technology":    ["AI", "software", "tech", "code", "computer",
                       "data", "cloud", "API", "GPU", "LLM"],
@@ -45,10 +27,6 @@ CATEGORIES = {
 }
 
 
-# ─────────────────────────────────────────────
-# HELPER: assign a category to a story title
-# ─────────────────────────────────────────────
-
 def assign_category(title):
     """
     Check the story title against each category's keyword list.
@@ -61,11 +39,6 @@ def assign_category(title):
             if keyword.lower() in title_lower:
                 return category   # stop at the first match
     return None  # story doesn't fit any category
-
-
-# ─────────────────────────────────────────────
-# STEP 1: Fetch the top 500 story IDs
-# ─────────────────────────────────────────────
 
 def fetch_top_story_ids():
     """
@@ -82,11 +55,6 @@ def fetch_top_story_ids():
         print(f"[ERROR] Could not fetch top story IDs: {e}")
         return []
 
-
-# ─────────────────────────────────────────────
-# STEP 2: Fetch details for a single story ID
-# ─────────────────────────────────────────────
-
 def fetch_story(story_id):
     """
     Fetches one story's JSON object by ID.
@@ -102,10 +70,7 @@ def fetch_story(story_id):
         print(f"[WARNING] Failed to fetch story {story_id}: {e}")
         return None
 
-
-# ─────────────────────────────────────────────
-# STEP 3: Extract the 7 required fields
-# ─────────────────────────────────────────────
+#  Extract the 7 required fields
 
 def extract_fields(story, category):
     """
@@ -123,9 +88,7 @@ def extract_fields(story, category):
     }
 
 
-# ─────────────────────────────────────────────
-# MAIN PIPELINE
-# ─────────────────────────────────────────────
+# MAIN function 
 
 def main():
     # -- Get the top story IDs first --
@@ -174,7 +137,6 @@ def main():
         # Wait 2 seconds between each category loop (as required)
         time.sleep(2)
 
-    # -- Save results to data/trends_YYYYMMDD.json --
     os.makedirs("data", exist_ok=True)   # create data/ folder if needed
 
     today_str = datetime.now().strftime("%Y%m%d")
